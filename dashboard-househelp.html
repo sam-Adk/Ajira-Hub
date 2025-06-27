@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Househelp Dashboard – AjiraHub</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    body {
+      background-image: url("assets/househelp-bg.jpg");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      min-height: 100vh;
+      margin: 0;
+      font-family: 'Arial', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    .overlay {
+      background-color: rgba(255, 255, 255, 0.9);
+      padding: 30px;
+      border-radius: 16px;
+      width: 90%;
+      max-width: 850px;
+      margin-top: 50px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    h2 {
+      color: #333;
+      margin-bottom: 20px;
+    }
+
+    .profile-section {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .profile-section img {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid #008037;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+    }
+
+    button {
+      background: #008037;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #005a27;
+    }
+
+    .job-form {
+      margin-top: 30px;
+    }
+
+    .job-form h3 {
+      margin-bottom: 15px;
+      color: #008037;
+    }
+
+    .job-listings {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      max-height: 90vh;
+      width: 300px;
+      overflow-y: auto;
+      background: rgba(255,255,255,0.95);
+      padding: 15px;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="job-listings">
+    <h3>Available Jobs</h3>
+    <div id="jobList"></div>
+  </div>
+
+  <div class="overlay">
+    <h2>Welcome, <span id="househelpName">Househelp</span></h2>
+
+    <div class="profile-section">
+      <img src="assets/default-profile.jpg" id="profilePic" alt="Profile Picture" />
+      <div>
+        <form id="profileForm" enctype="multipart/form-data">
+          <input type="file" id="picInput" name="profilePic" accept="image/*" />
+          <div class="form-group">
+            <label for="bio">Bio:</label>
+            <textarea id="bio" name="bio" rows="3" placeholder="Write a short bio..."></textarea>
+          </div>
+          <button type="submit">Update Profile</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="job-form">
+      <h3>Post Availability or Service</h3>
+      <form id="jobPostForm">
+        <div class="form-group">
+          <label for="job-role">Service You Offer:</label>
+          <input type="text" id="job-role" required placeholder="e.g., Babysitting, Cleaning, Cooking" />
+        </div>
+        <div class="form-group">
+          <label for="job-location">Your Location:</label>
+          <input type="text" id="job-location" required />
+        </div>
+        <div class="form-group">
+          <label for="job-type">Type:</label>
+          <select id="job-type">
+            <option value="live-in">Live-in</option>
+            <option value="part-time">Part-time</option>
+          </select>
+        </div>
+        <button type="submit">Post Availability</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const user = JSON.parse(localStorage.getItem("ajirahub_user"));
+
+    if (user) {
+      document.getElementById("househelpName").innerText = user.name;
+      if (user.profilePic) {
+        document.getElementById("profilePic").src = user.profilePic;
+      }
+      document.getElementById("bio").value = user.bio || "";
+    }
+
+    // Update profile
+    document.getElementById("profileForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const formData = new FormData();
+      formData.append("id", user._id);
+      formData.append("bio", document.getElementById("bio").value);
+      if (document.getElementById("picInput").files[0]) {
+        formData.append("profilePic", document.getElementById("picInput").files[0]);
+      }
+
+      const res = await fetch("http://localhost:5000/api/users/update", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+      if (data.user) {
+        localStorage.setItem("ajirahub_user", JSON.stringify(data.user));
+        location.reload();
+      }
+    });
+
+    // Post availability
+    document.getElementById("jobPostForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const job = {
+        role: document.getElementById("job-role").value,
+        location: document.getElementById("job-location").value,
+        jobType: document.getElementById("job-type").value,
+        userId: user._id,
+        postedByRole: "househelp"
+      };
+
+      const res = await fetch("http://localhost:5000/api/jobs/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(job)
+      });
+
+      const data = await res.json();
+      if (data.job) {
+        alert("✅ Availability posted!");
+        document.getElementById("jobPostForm").reset();
+        fetchEmployerJobs();
+      }
+    });
+
+    // Load available jobs by employers
+    async function fetchEmployerJobs() {
+      const res = await fetch("http://localhost:5000/api/jobs/employer");
+      const jobs = await res.json();
+
+      const container = document.getElementById("jobList");
+      container.innerHTML = "";
+      jobs.forEach(job => {
+        const div = document.createElement("div");
+        div.style.padding = "10px";
+        div.style.border = "1px solid #ccc";
+        div.style.marginBottom = "10px";
+        div.style.borderRadius = "8px";
+        div.innerHTML = `
+          <strong>${job.role}</strong><br/>
+          ${job.location} – ${job.jobType}<br/>
+          <small>Posted by: ${job.createdBy?.name || "Unknown"}</small>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    fetchEmployerJobs();async function fetchEmployerJobs() {
+  const res = await fetch("http://localhost:5000/api/jobs/employer");
+  const jobs = await res.json();
+
+  const container = document.getElementById("jobList");
+  container.innerHTML = "";
+  jobs.forEach(job => {
+    const div = document.createElement("div");
+    div.style.padding = "15px";
+    div.style.border = "1px solid #ccc";
+    div.style.marginBottom = "10px";
+    div.style.borderRadius = "10px";
+    div.innerHTML = `
+      <strong>${job.role}</strong> - ${job.location} (${job.jobType})<br/>
+      Posted by: ${job.userId?.name || "Unknown"}
+    `;
+    container.appendChild(div);
+  });
+}
+
+  </script>
+</body>
+</html>
+
+
+
+
+
+
+

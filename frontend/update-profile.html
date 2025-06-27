@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Update Profile - AjiraHub</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="form-container">
+    <h2>Update Your Profile</h2>
+
+    <form id="profileForm" enctype="multipart/form-data">
+      <label for="profilePic">Profile Picture:</label>
+      <input type="file" id="profilePic" name="profilePic" accept="image/*" />
+
+      <label for="bio">Bio:</label>
+      <textarea id="bio" name="bio" rows="4" placeholder="Tell us about yourself..."></textarea>
+
+      <button type="submit" class="btn">Save Profile</button>
+    </form>
+
+    <div style="margin-top: 20px;">
+      <h3>Preview:</h3>
+      <img id="preview" src="" alt="Profile Preview" width="150" />
+      <p id="bioText"></p>
+    </div>
+  </div>
+
+  <script src="js/profile.js"></script>
+</body>
+</html>
