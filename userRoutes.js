@@ -3,7 +3,7 @@ const router = express.Router();
 const multer = require('multer');
 const path = require('path');
 
-// Import all controller functions
+// Import controller functions
 const { registerUser, loginUser, updateProfile } = require("../controllers/userController");
 
 // Multer setup
