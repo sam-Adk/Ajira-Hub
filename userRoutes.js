@@ -2,11 +2,9 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const path = require('path');
-const { registerUser, loginUser } = require("../controllers/userController");  // Make sure these exist
-  registerUser,
-  loginUser,
-  updateProfile
-} = require('../controllers/userController');
+
+// Import all controller functions correctly
+const { registerUser, loginUser, updateProfile } = require("../controllers/userController");
 
 // Set up multer for file uploads
 const storage = multer.diskStorage({
