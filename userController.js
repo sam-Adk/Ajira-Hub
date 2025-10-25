@@ -1,5 +1,5 @@
 // Import your User model
-const User = require('../models/User'); // Make sure the path is correct
+const User = require('../models/User'); // Update path if needed
 
 // Register user
 const registerUser = async (req, res) => {
@@ -43,6 +43,7 @@ const updateProfile = async (req, res) => {
 
 // Export all functions
 module.exports = { registerUser, loginUser, updateProfile };
+
 
 
 
