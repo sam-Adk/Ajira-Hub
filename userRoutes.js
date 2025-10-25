@@ -3,15 +3,13 @@ const router = express.Router();
 const multer = require('multer');
 const path = require('path');
 
-// Import all controller functions correctly
+// Import all controller functions
 const { registerUser, loginUser, updateProfile } = require("../controllers/userController");
 
-// Set up multer for file uploads
+// Multer setup
 const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'uploads/');
-  },
-  filename: function (req, file, cb) {
+  destination: (req, file, cb) => cb(null, 'uploads/'),
+  filename: (req, file, cb) => {
     const ext = path.extname(file.originalname);
     cb(null, `${Date.now()}${ext}`);
   }
