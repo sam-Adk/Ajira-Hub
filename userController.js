@@ -1,18 +1,33 @@
-// controllers/userController.js
+// Import your User model
+const User = require('../models/User'); // Make sure the path is correct
 
+// Register user
 const registerUser = async (req, res) => {
-  // registration logic
+  try {
+    // registration logic here
+    res.status(200).json({ message: "User registered successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Registration failed" });
+  }
 };
 
+// Login user
 const loginUser = async (req, res) => {
-  // login logic
+  try {
+    // login logic here
+    res.status(200).json({ message: "User logged in successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Login failed" });
+  }
 };
 
+// Update profile
 const updateProfile = async (req, res) => {
   const { id } = req.body;
   try {
     const updateData = {};
-
     if (req.body.bio) updateData.bio = req.body.bio;
     if (req.file) updateData.profilePic = `http://localhost:5000/uploads/${req.file.filename}`;
 
@@ -26,8 +41,8 @@ const updateProfile = async (req, res) => {
   }
 };
 
+// Export all functions
 module.exports = { registerUser, loginUser, updateProfile };
-
 
 
 
